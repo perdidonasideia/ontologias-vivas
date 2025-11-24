@@ -28,4 +28,4 @@ jobs:
           SHEET_ID: ${{ secrets.SHEET_ID }}
         run: |
           echo "$GOOGLE_SHEETS_CREDENTIALS" > service_account.json
-          python gerador.py
+          python generator/build.py
