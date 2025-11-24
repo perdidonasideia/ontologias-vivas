@@ -1,0 +1,36 @@
+name: Generate IA Ontology Themes
+
+on:
+  workflow_dispatch:
+    inputs:
+      count:
+        description: "Número de tópicos a gerar"
+        required: true
+        default: "10"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    
+    - name: Setup Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: pip install -r requirements.txt
+    
+    - name: Run generator and push to Google Sheets
+      env:
+        SHEET_ID: ${{ secrets.SHEET_ID }}
+        CREDS_JSON: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
+      run: |
+        python scripts/push_to_sheets.py \
+          --sheet_id "$SHEET_ID" \
+          --range "A1" \
+          --count "${{ github.event.inputs.count }}" \
+          --creds "$CREDS_JSON"
