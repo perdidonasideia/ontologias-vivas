@@ -1,36 +1,31 @@
-name: Generate IA Ontology Themes
+name: Gerar Temas Ontológicos
 
 on:
   workflow_dispatch:
-    inputs:
-      count:
-        description: "Número de tópicos a gerar"
-        required: true
-        default: "10"
+  schedule:
+    - cron: "0 12 * * *"   # roda todo dia às 12h (opcional)
 
 jobs:
-  build:
+  gerar:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v4
-    
-    - name: Setup Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
-    
-    - name: Install dependencies
-      run: pip install -r requirements.txt
-    
-    - name: Run generator and push to Google Sheets
-      env:
-        SHEET_ID: ${{ secrets.SHEET_ID }}
-        CREDS_JSON: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
-      run: |
-        python scripts/push_to_sheets.py \
-          --sheet_id "$SHEET_ID" \
-          --range "A1" \
-          --count "${{ github.event.inputs.count }}" \
-          --creds "$CREDS_JSON"
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Configurar Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.10"
+
+      - name: Instalar dependências
+        run: |
+          pip install gspread google-auth
+
+      - name: Rodar gerador e enviar ao Google Sheets
+        env:
+          GOOGLE_SHEETS_CREDENTIALS: ${{ secrets.GOOGLE_SHEETS_CREDENTIALS }}
+          SHEET_ID: ${{ secrets.SHEET_ID }}
+        run: |
+          echo "$GOOGLE_SHEETS_CREDENTIALS" > service_account.json
+          python gerador.py
